@@ -188,7 +188,7 @@ def select_best_translation(context_text, original, basic_translation, optimized
 如果翻译0更好，返回数字 0；如果翻译1更好，返回数字 1。
 仅返回一个数字。
 """
-    response = chat_llm(prompt=prompt, sysprompt="You are a transcription evaluation expert.",model=model_name if model_name else None, api_key=api_key, backend=backend if backend else None, logger=logger)
+    response = chat_llm(prompt=prompt, sysprompt="You are a transcription evaluation expert.",model_name=model_name if model_name else None, api_key=api_key, backend=backend if backend else None, logger=logger)
     try:
         choice = int(response.strip())
         return basic_translation if choice == 0 else optimized_translation
@@ -271,7 +271,7 @@ def optimize_translation(original, basic_translation, context_text, api_key, des
        f"Output only the accurate \"{dest_language} language\" translation of the Original. Do not include any additional explanations or content."
     )
 
-    optimized_translation = chat_llm(prompt=prompt, sysprompt="You are a transcription optimization expert.",model=model_name if model_name else None, api_key=api_key, backend=backend if backend else None, logger=logger)
+    optimized_translation = chat_llm(prompt=prompt, sysprompt="You are a transcription optimization expert.",model_name=model_name if model_name else None, api_key=api_key, backend=backend if backend else None, logger=logger)
     return optimized_translation if optimized_translation else basic_translation
 
 from tqdm import tqdm

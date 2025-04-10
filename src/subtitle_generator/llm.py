@@ -2,7 +2,7 @@ import time
 from datetime import datetime
 from openai import OpenAI
 
-def chat_with_ollama(prompt, sysprompt='', model="huihui_ai/qwen2.5-1m-abliterated:7b", max_attempts=5, logger=None):
+def chat_with_ollama(prompt, sysprompt='', model_name="huihui_ai/qwen2.5-1m-abliterated:7b", max_attempts=5, logger=None):
     """
     使用本地 Ollama 模型进行对话，采用指数退避策略。
 
@@ -22,7 +22,7 @@ def chat_with_ollama(prompt, sysprompt='', model="huihui_ai/qwen2.5-1m-abliterat
         try:
             start_time = datetime.now()
             response = ollama.chat(
-                model=model,
+                model=model_name,
                 messages=[
                     {"role": "system", "content": sysprompt},
                     {"role": "user", "content": prompt},
@@ -33,7 +33,7 @@ def chat_with_ollama(prompt, sysprompt='', model="huihui_ai/qwen2.5-1m-abliterat
             if logger:
                 duration = (end_time - start_time).total_seconds()
                 log_message = (
-                    f"Model: {model}\nStart: {start_time}\nEnd: {end_time}\nDuration: {duration:.2f} s\n"
+                    f"Model: {model_name}\nStart: {start_time}\nEnd: {end_time}\nDuration: {duration:.2f} s\n"
                     f"Prompt:\n{prompt}\nResponse:\n{response_text}\n{'='*50}"
                 )
                 logger.info(log_message)
@@ -46,7 +46,7 @@ def chat_with_ollama(prompt, sysprompt='', model="huihui_ai/qwen2.5-1m-abliterat
     print("达到最大尝试次数，返回空字符串")
     return ""
 
-def chatwith_gpt(prompt, sysprompt='', model="gpt-4o", api_key='', max_attempts=5, logger=None):
+def chatwith_gpt(prompt, sysprompt='', model_name="gpt-4o", api_key='', max_attempts=5, logger=None):
     """
     使用 OpenAI GPT 模型进行对话，采用指数退避策略。
 
@@ -70,7 +70,7 @@ def chatwith_gpt(prompt, sysprompt='', model="gpt-4o", api_key='', max_attempts=
         try:
             start_time = datetime.now()
             completion = client.chat.completions.create(
-                model=model,
+                model=model_name,
                 messages=[
                     {"role": "system", "content": sysprompt},
                     {"role": "user", "content": prompt},
@@ -81,7 +81,7 @@ def chatwith_gpt(prompt, sysprompt='', model="gpt-4o", api_key='', max_attempts=
             if logger:
                 duration = (end_time - start_time).total_seconds()
                 log_message = (
-                    f"Model: {model}\nStart: {start_time}\nEnd: {end_time}\nDuration: {duration:.2f} s\n"
+                    f"Model: {model_name}\nStart: {start_time}\nEnd: {end_time}\nDuration: {duration:.2f} s\n"
                     f"Prompt:\n{prompt}\nResponse:\n{response_text}\n{'='*50}"
                 )
                 logger.info(log_message)
@@ -114,8 +114,8 @@ def chat_llm(prompt, sysprompt='', model_name=None, api_key='', backend="gpt", m
     if backend and isinstance(backend, str) and "ollama" in backend.lower():
         if not model_name:
             model_name = "huihui_ai/qwen2.5-1m-abliterated:7b"
-        return chat_with_ollama(prompt=prompt, sysprompt=sysprompt, model=model_name, max_attempts=max_attempts, logger=logger)
+        return chat_with_ollama(prompt=prompt, sysprompt=sysprompt, model_name=model_name, max_attempts=max_attempts, logger=logger)
     else:  # 默认采用 "gpt"
         if not model_name:
             model_name = "gpt-4o"
-        return chatwith_gpt(prompt=prompt, sysprompt=sysprompt, model=model_name, api_key=api_key, max_attempts=max_attempts, logger=logger)
+        return chatwith_gpt(prompt=prompt, sysprompt=sysprompt, model_name=model_name, api_key=api_key, max_attempts=max_attempts, logger=logger)

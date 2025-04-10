@@ -70,7 +70,7 @@ def llm_correct_segments(segments, api_key, context_range=10, model_name=None, b
             "Output only the corrected text of the current segment. Do not include any additional explanations, comments, or content.\n"
         )
         try:
-            corrected_text = chat_llm(prompt=prompt, sysprompt="You are a transcription correction expert.",model=model_name if model_name else None, api_key=api_key, backend=backend if backend else None, logger=logger)
+            corrected_text = chat_llm(prompt=prompt, sysprompt="You are a transcription correction expert.",model_name=model_name if model_name else None, api_key=api_key, backend=backend if backend else None, logger=logger)
         except Exception as e:
             print(f"LLM纠错异常：{e}")
             corrected_text = seg["text"]
@@ -129,7 +129,7 @@ def should_merge(seg1, seg2, api_key, model_name=None, backend=None, logger=None
             f"[Segment 2] Start time: {seg2['start']} seconds, End time: {seg2['end']} seconds, Text: '{seg2['text']}'\n"
             "Respond with only 'Merge' or 'Do not merge'."
         )
-        answer = chat_llm(prompt=prompt, sysprompt="You are a subtitle optimization expert.",model=model_name if model_name else None, api_key=api_key, backend=backend if backend else None, logger=logger)
+        answer = chat_llm(prompt=prompt, sysprompt="You are a subtitle optimization expert.",model_name=model_name if model_name else None, api_key=api_key, backend=backend if backend else None, logger=logger)
         if answer and ("not" in answer.lower() or "不" in answer):
             return False
         return True
