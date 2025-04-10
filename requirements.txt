@@ -1,3 +1,5 @@
+argparse
+ollama
 openai
 moviepy
 whisper

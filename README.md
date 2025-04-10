@@ -13,7 +13,7 @@ Subtitle Generator 是一个集成转录、分段、翻译和 LLM 优化等技�
 
 ---
 
-## 环境配置
+## Setup
 
 ### 1. 配置 Spleeter
 ```bash
@@ -52,19 +52,14 @@ pip install -r requirements.txt
 ### 3. 环境变量
 请确保已配置以下环境变量：
 - `SPLEETER_PATH` : Spleeter模型文件根目录
-- `CONDA_BASE_PATH`: Conda安装根目录
+- `CONDA_BASE_PATH`: Conda/Miniconda安装根目录
 - `niutrans_access_key`: 小牛翻译 APIKey (申请: https://niutrans.com/)
-- `OPENAI_API_KEY`: OpenAI API Key (申请: https://platform.openai.com/signup)
+- `OPENAI_API_KEY`: OpenAI API Key (申请: https://platform.openai.com/)
 - `Whisper_model_path`: Whisper本地模型文件目录
 
 ---
 
-## 使用方式
-
-培金命令：
-```bash
-python -m subtitle_generator.cli --video /path/to/video.mp4 --target_lang en --openai_key sk-xxx --llm_backend gpt
-```
+## Python usage
 
 支持参数：
 - `--video`: 必选，视频文件路径
