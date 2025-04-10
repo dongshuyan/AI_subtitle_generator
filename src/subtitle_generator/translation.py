@@ -310,8 +310,8 @@ def optimize_translations_with_context(segments, basic_translations,
             context_parts.append("后文: " + " ".join(basic_translations[i+1:end_idx]))
         context_text = "\n".join(context_parts)
         if use_llm:
-            optimized_trans = optimize_translation(original, basic_trans, context_text, api_key, dest_language, model=model_name if model_name else None, backend=backend if backend else None, logger=logger)
-            optimized_trans = select_best_translation(context_text, original, basic_trans, optimized_trans, api_key, dest_language, model=model_name if model_name else None, backend=backend if backend else None, logger=logger)
+            optimized_trans = optimize_translation(original, basic_trans, context_text, api_key, dest_language, model_name=model_name if model_name else None, backend=backend if backend else None, logger=logger)
+            optimized_trans = select_best_translation(context_text, original, basic_trans, optimized_trans, api_key, dest_language, model_name=model_name if model_name else None, backend=backend if backend else None, logger=logger)
             basic_translations[i] = optimized_trans
         else:
             optimized_trans = basic_trans

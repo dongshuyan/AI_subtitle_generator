@@ -73,12 +73,11 @@ pip install -r requirements.txt
 - `--use_llm_translation`: 使用 LLM 进行翻译优化
 - `--model_size`: Whisper 模型大小，如 base, medium, large-v3 (默认为 config.py 设置)
 - `--source_lang`: 指定转录语言（空则自动检测）
-- `--log`: 记录 LLM 作用日志
 
 无论是研究视频 AI 分析或者生产实操需求，AI Subtitle Generator 均是性能丰富且易于扩展的选择。
 
 示例命令
 ```bash
 cd src
-python -m subtitle_generator.cli --video '~/Downloads/test.mkv' --target_lang zh --use_llm_correction --use_llm_segmentation --use_llm_translation --log --llm_backend 'gpt' --model_name 'gpt-4o'
+python -m subtitle_generator.cli --video '~/Downloads/test.mkv' --target_lang zh --use_llm_translation --llm_backend 'gpt' --model_name 'gpt-4o'
 ```

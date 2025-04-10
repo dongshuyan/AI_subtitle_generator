@@ -120,8 +120,8 @@ async def main():
             final_segments = processed_segments
             print("源语言与目标字幕语言一致，跳过翻译。")
         
-        final_srt = f"{video_basename}_final.srt"
-        final_ass = f"{video_basename}_final.ass"
+        final_srt = f"{video_basename}.srt"
+        final_ass = f"{video_basename}.ass"
         generate_srt(final_segments, final_srt)
         generate_ass(final_segments, final_ass)
         print(f"最终字幕文件生成完成：\nSRT：{final_srt}\nASS：{final_ass}")
