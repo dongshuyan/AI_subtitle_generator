@@ -31,11 +31,11 @@ def llm_correct_segments(segments, api_key, context_range=10, model_name=None, b
         start_idx = max(0, i - context_range)
         previous_context = [segments[j]["text"] for j in range(start_idx, i) if segments[j].get("text", "").strip()]
         if previous_context:
-            context += "Previous context: " + " ".join(previous_context) + "\n"
+            context += "Previous context: " + "\n".join(previous_context) + "\n"
         end_idx = min(total, i + context_range + 1)
         next_context = [segments[j]["text"] for j in range(i + 1, end_idx) if segments[j].get("text", "").strip()]
         if next_context:
-            context += "Next context: " + " ".join(next_context) + "\n"
+            context += "Next context: " + "\n".join(next_context) + "\n"
         
         prompt = (
             "You are an expert in correcting transcription errors across multiple languages. \n"

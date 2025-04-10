@@ -90,12 +90,12 @@ async def async_basic_translate(text, dest='zh-cn', src=None):
 
 import asyncio
 import time
-from tqdm import tqdm
+from tqdm import tqdm  # 进度条模块
 
 async def basic_translate_segments(segments, detected_language, translate_func, dest_language, concurrency_limit=5):
     """
     对所有段落使用基础翻译函数进行翻译。
-    如果 translate_func 为异步函数，利用 asyncio 并发控制加速翻译；
+    如果 translate_func 为异步函数，利用 asyncio 并发控制加速翻译并显示进度条；
     如果为同步函数，则在翻译过程中显示 tqdm 进度条，并进行重试。
     
     参数：
@@ -110,14 +110,15 @@ async def basic_translate_segments(segments, detected_language, translate_func, 
     """
     basic_translations = []
     
-    # 如果 translate_func 是异步函数，则用并发+重试策略
+    # 异步函数处理部分
     if asyncio.iscoroutinefunction(translate_func):
         semaphore = asyncio.Semaphore(concurrency_limit)
+        max_attempts = 5
+        delay = 1
+
         async def sem_translate(text):
-            max_attempts = 5
-            delay = 1
+            attempt = 0
             async with semaphore:
-                attempt = 0
                 while attempt < max_attempts:
                     try:
                         return await translate_func(text, src=detected_language, dest=dest_language)
@@ -127,10 +128,20 @@ async def basic_translate_segments(segments, detected_language, translate_func, 
                         await asyncio.sleep(delay * (2 ** (attempt - 1)))
                 # 如果全部重试失败，则返回原文本
                 return text
-        tasks = [sem_translate(seg["text"]) for seg in segments]
+
+        # 使用进度条包装每个任务，保证任务结束时更新进度条且结果顺序不变
+        progress_bar = tqdm(total=len(segments), desc="异步翻译中")
+        async def task_wrapper(text):
+            result = await sem_translate(text)
+            progress_bar.update(1)
+            return result
+        
+        tasks = [task_wrapper(seg["text"]) for seg in segments]
         basic_translations = await asyncio.gather(*tasks, return_exceptions=False)
+        progress_bar.close()
+        
     else:
-        # 同步函数部分：原有代码，带重试和进度条
+        # 同步函数部分：带重试和 tqdm 进度条
         max_attempts = 5
         for seg in tqdm(segments, desc="基础翻译中"):
             original = seg["text"]
@@ -150,6 +161,90 @@ async def basic_translate_segments(segments, detected_language, translate_func, 
                         basic_trans = original
             basic_translations.append(str(basic_trans))
     return basic_translations
+
+# 示例调用（需要根据具体环境定义 translate_func）
+if __name__ == '__main__':
+    import random
+
+    # 示例：一个模拟的异步翻译函数，每次调用随机“失败”或返回翻译结果
+    async def fake_async_translate(text, src, dest):
+        await asyncio.sleep(0.1)  # 模拟网络延迟
+        if random.random() < 0.2:
+            raise Exception("翻译服务故障")
+        return f"[{dest}] {text}"
+
+    # 构造测试段落
+    segments = [{"text": f"段落{i}内容"} for i in range(10)]
+    detected_language = "zh-cn"
+    dest_language = "en"
+
+    # 使用异步翻译示例
+    async def run_test():
+        translations = await basic_translate_segments(segments, detected_language, fake_async_translate, dest_language)
+        for original, trans in zip(segments, translations):
+            print(f"原文: {original['text']} -> 翻译: {trans}")
+    
+    asyncio.run(run_test())
+
+
+# async def basic_translate_segments(segments, detected_language, translate_func, dest_language, concurrency_limit=5):
+#     """
+#     对所有段落使用基础翻译函数进行翻译。
+#     如果 translate_func 为异步函数，利用 asyncio 并发控制加速翻译；
+#     如果为同步函数，则在翻译过程中显示 tqdm 进度条，并进行重试。
+    
+#     参数：
+#       - segments: 包含 "text" 键的段列表
+#       - detected_language: 源语言代码
+#       - translate_func: 翻译函数（如 niutrans_translate 或 async_basic_translate）
+#       - dest_language: 目标语言代码（例如 "en", "zh-cn", "es"）
+#       - concurrency_limit: 并发限制（仅对异步函数有效）
+    
+#     返回：
+#       - 翻译结果列表，与 segments 顺序对应
+#     """
+#     basic_translations = []
+    
+#     # 如果 translate_func 是异步函数，则用并发+重试策略
+#     if asyncio.iscoroutinefunction(translate_func):
+#         semaphore = asyncio.Semaphore(concurrency_limit)
+#         async def sem_translate(text):
+#             max_attempts = 5
+#             delay = 1
+#             async with semaphore:
+#                 attempt = 0
+#                 while attempt < max_attempts:
+#                     try:
+#                         return await translate_func(text, src=detected_language, dest=dest_language)
+#                     except Exception as e:
+#                         attempt += 1
+#                         print(f"异步翻译尝试 {attempt}/{max_attempts} 失败: {e}")
+#                         await asyncio.sleep(delay * (2 ** (attempt - 1)))
+#                 # 如果全部重试失败，则返回原文本
+#                 return text
+#         tasks = [sem_translate(seg["text"]) for seg in segments]
+#         basic_translations = await asyncio.gather(*tasks, return_exceptions=False)
+#     else:
+#         # 同步函数部分：原有代码，带重试和进度条
+#         max_attempts = 5
+#         for seg in tqdm(segments, desc="基础翻译中"):
+#             original = seg["text"]
+#             attempts = 0
+#             while attempts < max_attempts:
+#                 try:
+#                     basic_trans = translate_func(original, src=detected_language, dest=dest_language)
+#                     if isinstance(basic_trans, bytes):
+#                         basic_trans = basic_trans.decode('utf-8')
+#                     break
+#                 except Exception as e:
+#                     attempts += 1
+#                     print(f"同步翻译调用失败（尝试 {attempts}/{max_attempts}）：{e}")
+#                     if attempts < max_attempts:
+#                         time.sleep(1)
+#                     else:
+#                         basic_trans = original
+#             basic_translations.append(str(basic_trans))
+#     return basic_translations
 
 
 
@@ -304,14 +399,15 @@ def optimize_translations_with_context(segments, basic_translations,
         context_parts = []
         if i > 0:
             start_idx = max(0, i - context_range)
-            context_parts.append("前文: " + " ".join(basic_translations[start_idx:i]))
+            context_parts.append("前文: " + "\n".join(basic_translations[start_idx:i]))
         if i < len(segments) - 1:
             end_idx = min(len(segments), i + context_range + 1)
-            context_parts.append("后文: " + " ".join(basic_translations[i+1:end_idx]))
+            context_parts.append("后文: " + "\n".join(basic_translations[i+1:end_idx]))
         context_text = "\n".join(context_parts)
         if use_llm:
             optimized_trans = optimize_translation(original, basic_trans, context_text, api_key, dest_language, model_name=model_name if model_name else None, backend=backend if backend else None, logger=logger)
-            optimized_trans = select_best_translation(context_text, original, basic_trans, optimized_trans, api_key, dest_language, model_name=model_name if model_name else None, backend=backend if backend else None, logger=logger)
+            if not basic_trans==optimized_trans:
+                optimized_trans = select_best_translation(context_text, original, basic_trans, optimized_trans, api_key, dest_language, model_name=model_name if model_name else None, backend=backend if backend else None, logger=logger)
             basic_translations[i] = optimized_trans
         else:
             optimized_trans = basic_trans
