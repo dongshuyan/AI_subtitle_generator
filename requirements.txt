@@ -1,0 +1,8 @@
+openai
+moviepy
+whisper
+torch
+librosa
+soundfile
+tqdm
+googletrans
