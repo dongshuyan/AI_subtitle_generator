@@ -1,6 +1,6 @@
-# Subtitle Generator
+# AI Subtitle Generator
 
-Subtitle Generator 是一个集成转录、分段、翻译和 LLM 优化等技术的强大视频字幕生成工具。
+AI Subtitle Generator 是一个集成转录、分段、翻译和 LLM 优化等技术的强大视频字幕生成工具。
 它合并了 Whisper 语音转录、Ollama / OpenAI GPT 类的 LLM 模型和多种翻译接口，可以将任意视频自动生成多语言字幕，是对视频内容进行分析、翻译和调优的最优解决方案之一。
 
 功能特色:
@@ -75,7 +75,7 @@ pip install -r requirements.txt
 - `--source_lang`: 指定转录语言（空则自动检测）
 - `--log`: 记录 LLM 作用日志
 
-无论是研究视频 AI 分析或者生产实操需求，Subtitle Generator 均是性能丰富且易于扩展的选择。
+无论是研究视频 AI 分析或者生产实操需求，AI Subtitle Generator 均是性能丰富且易于扩展的选择。
 
 示例命令
 ```bash
